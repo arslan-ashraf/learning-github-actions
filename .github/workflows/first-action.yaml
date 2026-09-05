@@ -11,6 +11,18 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Allows you to run this worflow from other workflows
+  # it can be used as ${{ inputs.my_key_name }} in the current workflow
+  # to use this workflow in another workflow, use the "use" keyword
+  # use: <path_to_this_workflow>, with: my_key_name: <some_name>
+  workflow_call: 
+    inputs:         # inputs to this reusable workflow
+      my_key_name:
+        description: some description
+        required: false
+        default: some default value
+        type: string
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains two jobs called "build_job" and "info_job"
@@ -41,10 +53,7 @@ jobs:
 
       - name: Update Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --download-only docker-ce docker-ce-cli containerd.io
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
+          echo "updating Docker"
           # sudo apt update
           # sudo apt install -y ca-certificates curl gnupg
           # sudo install -m 0755 -d /etc/apt/keyrings
@@ -65,14 +74,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cache the .deb Packages
-        uses: actions/cache@v6
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-docker-latest
-
-      - name: Update Docker
-        run: sudo apt install -f -y
       - name: Print Docker in Different Job
         run: docker --version
 
