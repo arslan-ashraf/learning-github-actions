@@ -24,15 +24,20 @@ jobs:
       - name: Clone the repo
         uses: actions/checkout@v7
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
+      - name: Print current Docker version
         run: docker --version
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Update Docker
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          sudo apt update
+          sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  docker_version_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Docker in Different Job
+        run: docker --version
+    
   info_job:
     runs-on: ubuntu-latest
     steps:
