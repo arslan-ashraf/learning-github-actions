@@ -27,6 +27,9 @@ jobs:
       - name: Print PATH
         run: echo $PATH | tr ':' '\n'
 
+      - name: Where Docker is installed
+        run: which docker
+
       - name: Print current Docker version
         run: docker --version
 
