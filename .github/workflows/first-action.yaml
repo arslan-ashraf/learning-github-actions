@@ -64,7 +64,7 @@ jobs:
     needs: build_job
     runs-on: ubuntu-latest
 
-    step:
+    steps:
       - name: Cache the .deb Packages
         uses: actions/cache@v6
         with:
