@@ -37,6 +37,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: /usr/bin/docker
+          key: updated-docker
 
       - name: Update Docker
         run: |
@@ -59,6 +60,11 @@ jobs:
     needs: build_job
     runs-on: ubuntu-latest
     steps:
+      - name: Cache updated Docker
+        uses: actions/cache@v6
+        with:
+          path: /usr/bin/docker
+          key: updated-docker
       - name: Print Docker in Different Job
         run: docker --version
 
