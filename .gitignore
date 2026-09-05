@@ -1,3 +1,5 @@
 setup.sh
 
 .github/workflows/learning-sample.yaml
+.github/workflows/fetch-aws-secrets.yaml
+.github/workflows/sample-trust-policy.json
