@@ -1,0 +1,419 @@
+# ---------------------------------------------------------------------------
+# 1. WORKFLOW NAME
+# ---------------------------------------------------------------------------
+
+name: CI Pipeline
+
+
+# ---------------------------------------------------------------------------
+# 2. WHEN SHOULD THIS WORKFLOW RUN?
+# ---------------------------------------------------------------------------
+
+on:
+  # Run whenever code is pushed to these branches.
+  push:
+    branches:
+      # - main
+      - dev
+
+  # Run when a pull request targets main.
+  pull_request:
+    branches:
+      - main
+
+  # Allows you to manually start the workflow from GitHub's UI.
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy after a successful build?"
+        required: true
+        default: false
+        type: boolean
+
+
+# ---------------------------------------------------------------------------
+# 3. GLOBAL ENVIRONMENT VARIABLES
+# ---------------------------------------------------------------------------
+
+# These are available to every job and every step unless overridden.
+env:
+  NODE_VERSION: "22"
+  BUILD_DIR: "dist"
+
+
+# ---------------------------------------------------------------------------
+# 4. JOBS
+# ---------------------------------------------------------------------------
+
+jobs:
+
+  # =========================================================================
+  # JOB 1: LINT
+  # =========================================================================
+
+  lint:
+    # The machine/environment this job runs on.
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------------
+    # STEPS
+    # -----------------------------------------------------------------------
+    #
+    # A job consists of one or more steps.
+    # Steps execute sequentially.
+
+    steps:
+
+      # Check the repository out onto the GitHub runner.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Node.js.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Install dependencies.
+      #
+      # "run" executes a shell command on the runner.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+
+  # =========================================================================
+  # JOB 2: TEST
+  # =========================================================================
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        # "with" is specifically used to provide inputs to an action
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+          # setup-node can cache npm's downloaded packages.
+          # This can make subsequent workflow runs considerably faster.
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # Example of generating a test report.
+      - name: Run coverage
+        run: npm run coverage
+
+      # ---------------------------------------------------------------------
+      # ARTIFACT
+      # ---------------------------------------------------------------------
+      #
+      # An artifact is a file/directory produced by a workflow that you want
+      # to keep after the job finishes.
+      #
+      # Unlike normal files on the runner, artifacts can be downloaded from
+      # the workflow's GitHub Actions page.
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+          # Don't fail the entire workflow if coverage doesn't exist.
+          if-no-files-found: warn
+
+
+  # =========================================================================
+  # JOB 3: BUILD
+  # =========================================================================
+  #
+  # This job demonstrates:
+  #
+  #   needs
+  #   matrix
+  #   outputs
+  #   artifacts
+
+  build_job:
+    # The build won't start until lint AND test succeed.
+    needs:
+      - lint
+      - test
+
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------------
+    # MATRIX BUILDS
+    # -----------------------------------------------------------------------
+    #
+    # Instead of writing separate jobs for Node 20, 22, etc., GitHub creates
+    # multiple copies of this job.
+    #
+    # For example:
+    #
+    #   build / 20
+    #   build / 22
+    #
+    strategy:
+      matrix:
+        node-version:
+          - "20"
+          - "22"
+
+      # If one matrix job fails, don't immediately cancel the others.
+      fail-fast: false
+
+    # -----------------------------------------------------------------------
+    # JOB OUTPUTS
+    # -----------------------------------------------------------------------
+    #
+    # A step can create an output.
+    # A job can expose that step output as a job output.
+    #
+    # Another job can then access it with:
+    #   needs.<job_name>.outputs.<outputs_key>
+    #   needs.build_job.outputs.build-version
+
+    outputs:
+      build-version: ${{ steps.version_id.outputs.used_version }}
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ---------------------------------------------------------------------
+      # STEP OUTPUT
+      # ---------------------------------------------------------------------
+      #
+      # We use GITHUB_OUTPUT to communicate a value from this step to later
+      # steps/jobs.
+
+      - name: Determine build version
+        id: version_id
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+
+          echo "Building version: $VERSION"
+
+          # Makes "used_version" available as:
+          #
+          #   steps.version_id.outputs.used_version
+          #
+          echo "used_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build application
+        run: npm run build
+
+      # ---------------------------------------------------------------------
+      # UPLOAD BUILD ARTIFACT
+      # ---------------------------------------------------------------------
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+
+          # Matrix values can be inserted into strings.
+          name: build-node-${{ matrix.node-version }}
+
+          path: ${{ env.BUILD_DIR }}/
+
+          # Optional compression level:
+          # 0 = no compression
+          # 9 = maximum compression
+          compression-level: 6
+
+
+  # =========================================================================
+  # JOB 4: PACKAGE
+  # =========================================================================
+  #
+  # This demonstrates downloading an artifact produced by another job.
+
+  package:
+    needs: build_job
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Download the artifact from the build job.
+      #
+      # Because build is a matrix job, there may be multiple artifacts matching
+      # "build-node-*".
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: build-node-*
+          path: builds/
+          merge-multiple: false
+
+      - name: Show downloaded files
+        run: |
+          echo "Downloaded artifacts:"
+          find builds -type f
+
+      # Create a ZIP containing the builds.
+      - name: Package builds
+        run: |
+          mkdir -p packages
+
+          zip -r \
+            "packages/application-${{ needs.build_job.outputs.build-version }}.zip" \
+            builds/
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-package
+          path: packages/
+
+
+  # =========================================================================
+  # JOB 5: DEPLOY
+  # =========================================================================
+  #
+  # This job demonstrates:
+  #
+  #   needs
+  #   if
+  #   secrets
+  #   environment
+  #
+
+  deploy:
+    needs: package
+
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------------
+    # CONDITIONAL JOB EXECUTION
+    # -----------------------------------------------------------------------
+    #
+    # Only deploy if:
+    #
+    #   1. The workflow was triggered by a push to main
+    #   2. OR the workflow was manually started with deploy=true
+    #
+    # github.event_name tells us what caused the workflow to run.
+
+    if: |
+      github.ref == 'refs/heads/main' ||
+      inputs.deploy == true
+
+    # GitHub environments can provide:
+    #
+    #   - environment-specific secrets
+    #   - environment-specific variables
+    #   - approval requirements
+    #
+    # For example, you could configure a "production" environment in the
+    # GitHub console that requires a human approval before this job runs
+    environment:
+      name: production
+      url: https://example.com
+
+    steps:
+
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: application-package
+          path: package/
+
+      - name: Show package
+        run: ls -lah package/
+
+      # ---------------------------------------------------------------------
+      # SECRETS
+      # ---------------------------------------------------------------------
+      #
+      # Secrets are configured in GitHub's repository/environment settings.
+      #
+      # NEVER put passwords/tokens directly into this YAML file.
+      #
+      # Access them with:
+      #
+      #   secrets.SECRET_NAME
+
+      - name: Deploy application
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "Deploying application..."
+
+          # Your real deployment command would go here.
+          #
+          # For example:
+          #
+          # ./deploy.sh "$DEPLOY_TOKEN" package/*.zip
+          #
+          # Be careful not to echo secrets!
+          
+          ./deploy.sh package/*.zip
+
+
+  # =========================================================================
+  # JOB 6: SUMMARY
+  # =========================================================================
+  #
+  # This demonstrates "always()".
+  #
+  # Normally a job that depends on another job won't run if its dependency
+  # fails. "always()" allows this job to run regardless.
+
+  summary:
+    needs:
+      - lint
+      - test
+      - build_job
+      - package
+      - deploy
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Print workflow summary
+        run: |
+          echo "================================"
+          echo "       CI WORKFLOW SUMMARY"
+          echo "================================"
+
+          echo "Lint:    ${{ needs.lint.result }}"
+          echo "Test:    ${{ needs.test.result }}"
+          echo "Build:   ${{ needs.build.result }}"
+          echo "Package: ${{ needs.package.result }}"
+          echo "Deploy:  ${{ needs.deploy.result }}"
+
+          echo ""
+          echo "Build version: ${{ needs.build.outputs.build-version }}"
