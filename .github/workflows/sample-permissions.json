@@ -7,7 +7,7 @@
       "Action": [
         "secretsmanager:GetSecretValue"
       ],
-      "Resource": "arn:aws:secretsmanager:us-east-1:123456789012:secret:prod/db-credentials-xyz123"
+      "Resource": "arn:aws:secretsmanager:<AWS_REGION>:<AWS_ACCOUNT_ID>:secret:<ENV>/<SECRET_NAME>"
     }
   ]
 }
