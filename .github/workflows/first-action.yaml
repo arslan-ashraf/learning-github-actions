@@ -10,7 +10,16 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+    # inputs:
+    #   environment:
+    #     description: 'Target environment'
+    #     required: true
+    #     default: 'staging'
+    #     type: choice
+    #     options:
+    #       - staging
+    #       - production
+          
   # Allows you to run this worflow from other workflows
   # it can be used as ${{ inputs.my_key_name }} in the current workflow
   # to use this workflow in another workflow, use the "use" keyword
