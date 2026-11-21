@@ -6,7 +6,7 @@ setup.sh
 /48-connect-github-actions-with-oidc/terraform.tfvars
 
 
-/49-secure-eks-cluster-with-github-actions/.terraform*
-/49-secure-eks-cluster-with-github-actions/terraform*
+/49-secure-eks-cluster-with-github-actions/48-connect-github-actions-with-oidc/.terraform*
+/49-secure-eks-cluster-with-github-actions/48-connect-github-actions-with-oidc/terraform*
 
-/49-secure-eks-cluster-with-github-actions/terraform.tfvars
+/49-secure-eks-cluster-with-github-actions/48-connect-github-actions-with-oidc/terraform.tfvars

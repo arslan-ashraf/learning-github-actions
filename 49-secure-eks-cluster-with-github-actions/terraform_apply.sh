@@ -2,6 +2,7 @@
 
 cd 40-secure-eks-cluster-with-vpc-endpoints
 
+
 terraform init
 
 terraform fmt -recursive

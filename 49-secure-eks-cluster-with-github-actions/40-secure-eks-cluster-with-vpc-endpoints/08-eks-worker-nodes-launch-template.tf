@@ -2,7 +2,7 @@
 data "aws_ami" "eks_worker_ami" {
   most_recent = true
   owners      = ["602401143452"] # AWS owner ID for EKS AMIs
-  
+
   filter {
     name   = "name"
     values = ["amazon-eks-node-1.31-*"] # x86_64 ami

@@ -1,5 +1,5 @@
 resource "aws_vpc" "eks_vpc" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/16"
 
   # enable both to true to use VPC endpoints
   enable_dns_support   = true
