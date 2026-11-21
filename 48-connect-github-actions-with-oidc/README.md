@@ -9,3 +9,4 @@ This is why this Terraform lab is copied into `learning-github-actions`
 2. Terraform will output `github_actions_role_arn`.  Copy that arn into Github secrets with key `AWS_GITHUB_ACTIONS_ROLE_ARN`.
 
 3. Run the workflow manually from the console.
+
