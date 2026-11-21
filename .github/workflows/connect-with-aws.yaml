@@ -16,8 +16,8 @@ on:
     #     default: 'staging'
     #     type: choice
     #     options:
+    #       - development
     #       - staging
-    #       - production
 
 permissions:
   contents: read
