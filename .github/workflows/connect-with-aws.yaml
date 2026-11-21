@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/connect-with-aws.yaml'
 
-  # run manually from console
+  # run manually from Github console
   workflow_dispatch:
     # inputs:
     #   environment:
