@@ -21,8 +21,8 @@ locals {
     "logs"        = "com.amazonaws.${var.aws_region}.logs"
     "autoscaling" = "com.amazonaws.${var.aws_region}.autoscaling"
     "ssm"         = "com.amazonaws.${var.aws_region}.ssm"
-    "ssmessages"  = "com.amazonaws.${var.aws_region}.ssm"
-    "ssm"         = "com.amazonaws.${var.aws_region}.ssm"
+    "ssmessages"  = "com.amazonaws.${var.aws_region}.ssmessages"
+    "ec2messages" = "com.amazonaws.${var.aws_region}.ec2messages"
   }
 }
 
