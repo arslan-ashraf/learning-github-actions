@@ -1,13 +1,9 @@
 #!/usr/bin/bash
 
-cd 03-k8s-in-terraform
+cd 48-connect-github-actions-with-oidc
 
 terraform destroy -auto-approve
 
-cd ../02-terraform-karpenter
-
-terraform destroy -auto-approve
-
-cd ../01-terraform-eks-cluster
+cd ../40-secure-eks-cluster-with-vpc-endpoints
 
 terraform destroy -auto-approve
