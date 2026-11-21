@@ -1,4 +1,4 @@
-In this lab, we harden the security of the EKS cluster by removing all public access of the EKS worker nodes.  Worker nodes will only have access to ECR, S3, EKS control plane, autoscaling, EC2 APIs and more through VPC endpoints.
+This lab combines labs 40 and 48 (with minor modifications) and we deploy to it securely with an automated CI pipeline with Github Actions.  We have a tightened EKS cluster (lab 40) and we setup Github OIDC (lab 48) to connect to AWS securely with a secretless method using short lived credentials through AWS IAM.
 
 We test this labs as follows:
 
