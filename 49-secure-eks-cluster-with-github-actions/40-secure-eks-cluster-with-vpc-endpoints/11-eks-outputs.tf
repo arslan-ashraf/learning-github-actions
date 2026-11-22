@@ -1,3 +1,8 @@
+output "command_to_configure_kubectl" {
+  description = "Command to update local kubeconfig to connect to the EKS cluster"
+  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${var.eks_cluster_name}"
+}
+
 # EKS Cluster API server endpoint
 # used by kubectl and external tools to communicate with the cluster
 output "eks_cluster_endpoint" {
@@ -8,6 +13,11 @@ output "eks_cluster_endpoint" {
 output "eks_cluster_id" {
   value       = aws_eks_cluster.example_eks_cluster.id
   description = "The id of the EKS cluster."
+}
+
+output "eks_cluster_arn" {
+  value       = aws_eks_cluster.example_eks_cluster.arn
+  description = "The arn of the EKS cluster."
 }
 
 # to find supported EKS Addons based on EKS cluster version
@@ -27,9 +37,4 @@ output "eks_cluster_name" {
 output "eks_cluster_certificate_authority_data" {
   value       = aws_eks_cluster.example_eks_cluster.certificate_authority[0].data
   description = "Base64 encoded CA certificate for kubectl config"
-}
-
-output "command_to_configure_kubectl" {
-  description = "Command to update local kubeconfig to connect to the EKS cluster"
-  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${var.eks_cluster_name}"
 }
