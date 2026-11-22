@@ -19,12 +19,12 @@ resource "aws_ecr_lifecycle_policy" "example_repo_policy" {
     rules = [
       {
         rulePriority = 1
-        description  = "Remove untagged images after 3 days"
+        description  = "Remove untagged images after 1 day"
         selection = {
           tagStatus   = "untagged"
           countType   = "sinceImagePushed"
           countUnit   = "days"
-          countNumber = 3
+          countNumber = 1
         }
         action = {
           type = "expire"
@@ -32,11 +32,11 @@ resource "aws_ecr_lifecycle_policy" "example_repo_policy" {
       },
       {
         rulePriority = 2
-        description  = "Keep only the latest 10 tagged images"
+        description  = "Keep only the latest 3 tagged images"
         selection = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"
-          countNumber = 10
+          countNumber = 3
         }
         action = {
           type = "expire"
