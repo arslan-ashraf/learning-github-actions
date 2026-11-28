@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "github_actions_deploy_permissions" {
 }
 
 resource "aws_iam_policy" "github_actions_deploy_policy" {
-  name        = "github-actions-eks-deploy-policy"
+  name        = "github_actions_deploy_policy"
   description = "Permissions to push images to ECR and discover EKS"
 
   policy = data.aws_iam_policy_document.github_actions_deploy_permissions.json
