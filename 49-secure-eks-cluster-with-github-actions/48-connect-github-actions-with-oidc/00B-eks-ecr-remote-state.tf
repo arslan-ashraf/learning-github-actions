@@ -11,5 +11,6 @@ locals {
   eks_cluster_endpoint  = local.lab_40_outputs.eks_cluster_endpoint
   eks_cluster_name      = local.lab_40_outputs.eks_cluster_name
   certificate_authority = local.lab_40_outputs.eks_cluster_certificate_authority_data
+  eks_cluster_arn       = local.lab_40_outputs.eks_cluster_arn
   ecr_repo_arn          = local.lab_40_outputs.ecr_repo_arn
 }

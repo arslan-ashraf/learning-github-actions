@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "github_actions_deploy_permissions" {
     ]
 
     resources = [
-      aws_ecr_repository.application.arn
+      local.ecr_repo_arn
     ]
   }
 
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "github_actions_deploy_permissions" {
     ]
 
     resources = [
-      data.aws_eks_cluster.existing.arn
+      local.eks_cluster_arn
     ]
   }
 }
