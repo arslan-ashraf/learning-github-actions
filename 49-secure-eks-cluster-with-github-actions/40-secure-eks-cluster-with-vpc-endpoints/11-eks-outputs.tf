@@ -38,3 +38,8 @@ output "eks_cluster_certificate_authority_data" {
   value       = aws_eks_cluster.example_eks_cluster.certificate_authority[0].data
   description = "Base64 encoded CA certificate for kubectl config"
 }
+
+output "ecr_repo_arn" {
+  value       = aws_ecr_repository.example_repo.arn
+  description = "ECR repo arn to be used in Github Actions role"
+}

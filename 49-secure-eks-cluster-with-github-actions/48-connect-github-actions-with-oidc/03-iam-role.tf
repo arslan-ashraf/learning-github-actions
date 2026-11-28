@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "github_actions_deploy_permissions" {
     resources = ["*"]
   }
 
-  # Push Docker images to our specific repository
+  # push docker images to a specific repository
   statement {
     effect = "Allow"
 
